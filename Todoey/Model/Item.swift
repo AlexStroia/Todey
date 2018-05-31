@@ -7,3 +7,8 @@
 //
 
 import Foundation
+
+class Item {
+    var title: String = ""
+    var checked: Bool = false
+}

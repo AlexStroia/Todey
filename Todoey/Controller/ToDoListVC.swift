@@ -12,8 +12,7 @@ import UIKit
 
 class ToDoListVC: UITableViewController {
     
-    var dataArray = ["HardCodeeee 1", "Hard-Code 2", "Keep coding sexy Alex"]
-    
+    var dataArray = [Item]()
     let defaults = UserDefaults.standard
     
     let defaultsKey = "ToDoListArray"
@@ -21,9 +20,13 @@ class ToDoListVC: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let data = defaults.array(forKey: defaultsKey) as? [String] {
-            dataArray = data
-        }
+        let item = Item()
+        item.title = "First"
+        dataArray.append(item)
+        
+//        if let data = defaults.array(forKey: defaultsKey) as? [Item] {
+//            dataArray = data
+//        }
         
     }
     
@@ -44,21 +47,36 @@ class ToDoListVC: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TodoeyCell", for: indexPath)
-        cell.textLabel?.text = dataArray[indexPath.row]
+        cell.textLabel?.text = dataArray[indexPath.row].title
+        
+        let objectItem = dataArray[indexPath.row]
+        
+        cell.accessoryType = objectItem.checked ? .checkmark : .none
+        
+//        if dataArray[indexPath.row].checked == true {
+//            cell.accessoryType = .checkmark
+//        } else {
+//            cell.accessoryType = .none
+//        }
+//
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        let accesoryType = tableView.cellForRow(at: indexPath)?.accessoryType
-        tableView.cellForRow(at: indexPath)?.accessoryType = accesoryType == .checkmark ? .none: .checkmark
+        //let accesoryType = tableView.cellForRow(at: indexPath)?.accessoryType
+        //tableView.cellForRow(at: indexPath)?.accessoryType = accesoryType == .checkmark ? .none: .checkmark
         //
-        //        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
-        //            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        //        } else {
-        //            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        //        }
-        //
+//        if dataArray[indexPath.row].checked == true {
+//            dataArray[indexPath.row].checked = false
+//        } else {
+//            dataArray[indexPath.row].checked = true
+//        }
+        
+        dataArray[indexPath.row].checked = !dataArray[indexPath.row].checked
+        tableView.reloadData()
+        
+        
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
@@ -69,7 +87,9 @@ class ToDoListVC: UITableViewController {
             if (textField.text?.trimmingCharacters(in: .whitespaces).isEmpty)! {
                 print("Could not store empty data!")
             } else {
-                self.dataArray.append(textField.text!)
+                let item = Item()
+                item.title = textField.text!
+                self.dataArray.append(item)
                 self.defaults.set(self.dataArray, forKey: self.defaultsKey)
                 self.tableView.reloadData()
             }
