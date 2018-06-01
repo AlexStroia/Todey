@@ -14,19 +14,19 @@ class ToDoListVC: UITableViewController {
     
     var dataArray = [Item]()
     let defaults = UserDefaults.standard
+    let filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    
     
     let defaultsKey = "ToDoListArray"
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        loadData()
         
-        let item = Item()
-        item.title = "First"
-        dataArray.append(item)
         
-//        if let data = defaults.array(forKey: defaultsKey) as? [Item] {
-//            dataArray = data
-//        }
+        //        if let data = defaults.array(forKey: defaultsKey) as? [Item] {
+        //            dataArray = data
+        //        }
         
     }
     
@@ -50,33 +50,20 @@ class ToDoListVC: UITableViewController {
         cell.textLabel?.text = dataArray[indexPath.row].title
         
         let objectItem = dataArray[indexPath.row]
-        
         cell.accessoryType = objectItem.checked ? .checkmark : .none
         
-//        if dataArray[indexPath.row].checked == true {
-//            cell.accessoryType = .checkmark
-//        } else {
-//            cell.accessoryType = .none
-//        }
-//
+        //        if dataArray[indexPath.row].checked == true {
+        //            cell.accessoryType = .checkmark
+        //        } else {
+        //            cell.accessoryType = .none
+        //        }
+        //
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-        //let accesoryType = tableView.cellForRow(at: indexPath)?.accessoryType
-        //tableView.cellForRow(at: indexPath)?.accessoryType = accesoryType == .checkmark ? .none: .checkmark
-        //
-//        if dataArray[indexPath.row].checked == true {
-//            dataArray[indexPath.row].checked = false
-//        } else {
-//            dataArray[indexPath.row].checked = true
-//        }
-        
         dataArray[indexPath.row].checked = !dataArray[indexPath.row].checked
-        tableView.reloadData()
-        
-        
+        saveData()
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
@@ -90,8 +77,8 @@ class ToDoListVC: UITableViewController {
                 let item = Item()
                 item.title = textField.text!
                 self.dataArray.append(item)
-                self.defaults.set(self.dataArray, forKey: self.defaultsKey)
-                self.tableView.reloadData()
+                self.saveData()
+                //  self.defaults.set(self.dataArray, forKey: self.defaultsKey)
             }
         }
         alertController.addTextField { (alertTextField) in
@@ -103,5 +90,25 @@ class ToDoListVC: UITableViewController {
         present(alertController, animated: true)
     }
     
+    private func saveData() {
+        let encoder = PropertyListEncoder()
+        do {
+            let data = try encoder.encode(dataArray)
+            try data.write(to: filePath!)
+        } catch {
+            print("Error thrown: \(error)")
+        }
+    }
+    
+    private func loadData() {
+        if let data = try? Data(contentsOf: filePath!) {
+            let decoder = PropertyListDecoder()
+            do {
+                dataArray = try decoder.decode([Item].self, from: data)
+            } catch {
+                print("An error has been thrown: \(error)")
+            }
+        }
+    }
 }
 
