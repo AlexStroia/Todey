@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 
 
@@ -15,18 +16,19 @@ class ToDoListVC: UITableViewController {
     var dataArray = [Item]()
     let defaults = UserDefaults.standard
     let filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     
     let defaultsKey = "ToDoListArray"
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadData()
-        
-        
+        //  loadDataWithCodableProtocol()
         //        if let data = defaults.array(forKey: defaultsKey) as? [Item] {
         //            dataArray = data
         //        }
+        
+        loadFromCoreData()
         
     }
     
@@ -62,8 +64,15 @@ class ToDoListVC: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+       
+//        context.delete(dataArray[indexPath.row])
+//        dataArray.remove(at: indexPath.row)
+        
         dataArray[indexPath.row].checked = !dataArray[indexPath.row].checked
-        saveData()
+        
+        
+        // saveDataWithCodableProtocol()
+        saveToCoreData()
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
@@ -74,10 +83,13 @@ class ToDoListVC: UITableViewController {
             if (textField.text?.trimmingCharacters(in: .whitespaces).isEmpty)! {
                 print("Could not store empty data!")
             } else {
-                let item = Item()
+                let item = Item(context: self.context)
                 item.title = textField.text!
+                item.checked = false
                 self.dataArray.append(item)
-                self.saveData()
+                self.saveToCoreData()
+                
+                //  self.saveDataWithCodableProtocol()
                 //  self.defaults.set(self.dataArray, forKey: self.defaultsKey)
             }
         }
@@ -90,25 +102,46 @@ class ToDoListVC: UITableViewController {
         present(alertController, animated: true)
     }
     
-    private func saveData() {
-        let encoder = PropertyListEncoder()
+    
+    private func saveToCoreData() {
         do {
-            let data = try encoder.encode(dataArray)
-            try data.write(to: filePath!)
+            try context.save()
+            print("Succes!")
         } catch {
-            print("Error thrown: \(error)")
+            print("Error in saving the data: \(error)")
         }
+        
+        tableView.reloadData()
     }
     
-    private func loadData() {
-        if let data = try? Data(contentsOf: filePath!) {
-            let decoder = PropertyListDecoder()
-            do {
-                dataArray = try decoder.decode([Item].self, from: data)
-            } catch {
-                print("An error has been thrown: \(error)")
-            }
+    private func loadFromCoreData() {
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        do {
+            dataArray = try context.fetch(request)
+        } catch {
+            print("Error: \(error)")
         }
+        
+        //    private func saveDataWithCodableProtocol() {
+        //        let encoder = PropertyListEncoder()
+        //        do {
+        //            let data = try encoder.encode(dataArray)
+        //            try data.write(to: filePath!)
+        //        } catch {
+        //            print("Error thrown: \(error)")
+        //        }
+        //    }
+        
+        //    private func loadDataWithCodableProtocol() {
+        //        if let data = try? Data(contentsOf: filePath!) {
+        //            let decoder = PropertyListDecoder()
+        //            do {
+        //                dataArray = try decoder.decode([Item].self, from: data)
+        //            } catch {
+        //                print("An error has been thrown: \(error)")
+        //            }
+        //        }
+        //    }
     }
 }
 

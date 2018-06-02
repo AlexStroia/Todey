@@ -9,7 +9,7 @@
 import Foundation
 
 //Codable - Also Encodable and Decodable
-class Item: Encodable, Decodable {
-    var title: String = ""
-    var checked: Bool = false
-}
+//class Item: Encodable, Decodable {
+//    var title: String = ""
+//    var checked: Bool = false
+//}
