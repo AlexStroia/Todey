@@ -17,6 +17,12 @@ class ToDoListVC: UITableViewController {
     let defaults = UserDefaults.standard
     let filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    //Load items as soon as categories gets set from the CategoriesVC
+    var selectedCategory: Categories? {
+        didSet {
+            loadFromCoreData()
+        }
+    }
     
     
     let defaultsKey = "ToDoListArray"
@@ -64,9 +70,9 @@ class ToDoListVC: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-       
-//        context.delete(dataArray[indexPath.row])
-//        dataArray.remove(at: indexPath.row)
+        
+        //        context.delete(dataArray[indexPath.row])
+        //        dataArray.remove(at: indexPath.row)
         
         dataArray[indexPath.row].checked = !dataArray[indexPath.row].checked
         
@@ -86,6 +92,7 @@ class ToDoListVC: UITableViewController {
                 let item = Item(context: self.context)
                 item.title = textField.text!
                 item.checked = false
+                item.parentCategory = self.selectedCategory
                 self.dataArray.append(item)
                 self.saveToCoreData()
                 
@@ -114,13 +121,21 @@ class ToDoListVC: UITableViewController {
         tableView.reloadData()
     }
     
-    private func loadFromCoreData() {
-        let request: NSFetchRequest<Item> = Item.fetchRequest()
+    private func loadFromCoreData(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil) {
+        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+        if let additionalPredicate = predicate {
+            let compountPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
+            request.predicate = compountPredicate
+        } else {
+            request.predicate = categoryPredicate
+        }
+        
         do {
             dataArray = try context.fetch(request)
         } catch {
             print("Error: \(error)")
         }
+        tableView.reloadData()
         
         //    private func saveDataWithCodableProtocol() {
         //        let encoder = PropertyListEncoder()
@@ -142,6 +157,22 @@ class ToDoListVC: UITableViewController {
         //            }
         //        }
         //    }
+    }
+}
+
+extension ToDoListVC: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+        request.predicate = predicate
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        loadFromCoreData(with: request, predicate: predicate)
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0 {
+            loadFromCoreData()
+        }
     }
 }
 
