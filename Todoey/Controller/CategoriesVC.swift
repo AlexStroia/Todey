@@ -8,16 +8,18 @@
 
 import UIKit
 import CoreData
+import RealmSwift
 
 class CategoriesVC: UITableViewController {
+    let realm = try! Realm()
     
-    var categoryData = [Categories]()
+    var categoryData: Results<Categories>! //= [Categories]()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadFromCoreData()
-
+        load()
+        
     }
     
     @IBAction func addButonClicked(_ sender: UIBarButtonItem) {
@@ -27,10 +29,10 @@ class CategoriesVC: UITableViewController {
             if (textField.text?.trimmingCharacters(in: .whitespaces).isEmpty)! {
                 print("Could not add empty spaces to the database!")
             } else {
-                let category = Categories(context: self.context)
+                let category = Categories()
                 category.name = textField.text!
-                self.categoryData.append(category)
-                self.saveToCoreData()
+           //     self.categoryData.append(category)
+                self.save(category: category)
             }
         }
         controller.addTextField { (text) in
@@ -42,26 +44,37 @@ class CategoriesVC: UITableViewController {
         
     }
     
-    private func saveToCoreData() {
+    private func save(category: Categories) {
         do {
-           try context.save()
-            print("Succes")
-        
-        } catch {
-            print("Error: \(error)")
-        }
-        
-        tableView.reloadData()
-    }
-    
-    private func loadFromCoreData() {
-        let request: NSFetchRequest<Categories> = Categories.fetchRequest()
-        do {
-            categoryData = try context.fetch(request)
-            tableView.reloadData()
+            try realm.write {
+                realm.add(category)
+                print("Succes in writing data to the realm database")
+            }
         } catch {
             print("An error has been thrown: \(error)")
         }
+        
+        //        do {
+        //           try context.save()
+        //            print("Succes")
+        //
+        //        } catch {
+        //            print("Error: \(error)")
+        //        }
+        //
+        tableView.reloadData()
+    }
+    
+    private func load() {
+        categoryData = realm.objects(Categories.self)
+        //        let request: NSFetchRequest<Categories> = Categories.fetchRequest()
+        //        do {
+        //            categoryData = try context.fetch(request)
+        //            tableView.reloadData()
+        //        } catch {
+        //            print("An error has been thrown: \(error)")
+        //        }
+        tableView.reloadData()
     }
 }
 
@@ -79,7 +92,7 @@ extension CategoriesVC {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let destinaton = segue.destination as? ToDoListVC {
             if let indexPath = tableView.indexPathForSelectedRow {
-                    destinaton.selectedCategory = categoryData[indexPath.row]
+                destinaton.selectedCategory = categoryData[indexPath.row]
             }
         }
     }

@@ -2,14 +2,14 @@
 //  Item.swift
 //  Todoey
 //
-//  Created by Alex on 5/31/18.
+//  Created by Alex on 6/3/18.
 //  Copyright © 2018 Alex. All rights reserved.
 //
 
 import Foundation
-
-//Codable - Also Encodable and Decodable
-//class Item: Encodable, Decodable {
-//    var title: String = ""
-//    var checked: Bool = false
-//}
+import RealmSwift
+class Item: Object {
+    @objc dynamic var title: String = " "
+    @objc dynamic var checked: Bool = false
+    var parentCategory = LinkingObjects(fromType: Categories.self, property: "items")
+}
