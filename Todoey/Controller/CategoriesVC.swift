@@ -9,6 +9,7 @@
 import UIKit
 import CoreData
 import RealmSwift
+import SwipeCellKit
 
 class CategoriesVC: UITableViewController {
     let realm = try! Realm()
@@ -19,7 +20,8 @@ class CategoriesVC: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         load()
-        
+        tableView.rowHeight = 120
+        tableView.estimatedRowHeight = UITableViewAutomaticDimension
     }
     
     @IBAction func addButonClicked(_ sender: UIBarButtonItem) {
@@ -78,9 +80,39 @@ class CategoriesVC: UITableViewController {
     }
 }
 
-extension CategoriesVC {
+extension CategoriesVC: SwipeTableViewCellDelegate {
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
+        guard orientation == .right else { return nil }
+        
+        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, indexPath in
+            // handle action by updating model with deletion
+            do {
+            try self.realm.write {
+                self.realm.delete(self.categoryData[indexPath.row])
+                print("Deleted with succes")
+                }
+            } catch {
+                print("Catched an exception: \(error)")
+            }
+        }
+        
+        // customize the action appearance
+        deleteAction.image = UIImage(named: "trash")
+        
+        return [deleteAction]
+        
+    }
+    
+    func tableView(_ tableView: UITableView, editActionsOptionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> SwipeOptions {
+        var options = SwipeOptions()
+        options.expansionStyle = .destructive
+     //   options.transitionStyle = .border
+        return options
+    }
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath) as! SwipeTableViewCell
+        cell.delegate = self
         cell.textLabel?.text = categoryData[indexPath.row].name
         return cell
     }
