@@ -9,11 +9,13 @@
 import UIKit
 import CoreData
 import RealmSwift
+import ChameleonFramework
 
 class ToDoListVC: SwipeTableTableVC {
     
     let realm = try! Realm()
     
+    @IBOutlet weak var searchBar: UISearchBar!
     //var dataArray = [Item]()
     var dataArray: Results<Item>?
     let defaults = UserDefaults.standard
@@ -39,6 +41,26 @@ class ToDoListVC: SwipeTableTableVC {
         //        }
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
+        guard let selectedCategoryColor = selectedCategory?.color else { fatalError() }
+        updateUIColor(with: selectedCategoryColor)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        updateUIColor(with: "1D9BF6")
+    }
+    
+    private func updateUIColor(with hexCode: String) {
+        guard let navigationBar = navigationController?.navigationBar else { return }
+        guard let navBarHexColor = UIColor(hexString: hexCode) else { return }
+        navigationBar.barTintColor = navBarHexColor
+        navigationBar.tintColor = ContrastColorOf(navBarHexColor, returnFlat: true)
+        navigationBar.largeTitleTextAttributes = [NSAttributedStringKey.foregroundColor: ContrastColorOf(navBarHexColor, returnFlat: true)]
+        searchBar.barTintColor = UIColor(hexString: hexCode)
+    }
+    
+    
     override func updateModels(at indexPath: IndexPath) {
         if let item = dataArray?[indexPath.row] {
             do {
@@ -62,13 +84,14 @@ class ToDoListVC: SwipeTableTableVC {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = super.tableView(tableView, cellForRowAt: indexPath)
-        
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)        
         if let item = dataArray?[indexPath.row] {
             cell.textLabel?.text = item.title
-            cell.accessoryType = item.checked ? .checkmark : .none
-        } else {
-            cell.textLabel?.text = "No items added"
+            if let color = UIColor(hexString: selectedCategory!.color)?.darken(byPercentage: CGFloat(indexPath.row) / CGFloat(dataArray!.count)) {
+                cell.backgroundColor = color
+                cell.textLabel?.textColor = ContrastColorOf(color, returnFlat: true)
+                cell.accessoryType = item.checked ? .checkmark : .none
+            }
         }
         return cell
     }
@@ -83,7 +106,7 @@ class ToDoListVC: SwipeTableTableVC {
         if let item = dataArray?[indexPath.row] {
             do {
                 try realm.write {
-                 //   realm.delete(item)
+                    //   realm.delete(item)
                     item.checked = !item.checked
                     print("Succes!")
                 }

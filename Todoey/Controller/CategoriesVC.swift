@@ -23,6 +23,7 @@ class CategoriesVC: SwipeTableTableVC {
         load()
         tableView.rowHeight = 120
         tableView.estimatedRowHeight = UITableViewAutomaticDimension
+        navigationController?.navigationBar.largeTitleTextAttributes = [NSAttributedStringKey.foregroundColor: FlatWhite()]
     }
     
     @IBAction func addButonClicked(_ sender: UIBarButtonItem) {

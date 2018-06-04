@@ -9,7 +9,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--CategoriesVC-->
+        <!--Main -->
         <scene sceneID="eFJ-yA-S0h">
             <objects>
                 <tableViewController id="dbi-Bg-jsf" customClass="CategoriesVC" customModule="Todoey" customModuleProvider="target" sceneMemberID="viewController">
@@ -32,7 +32,7 @@
                             <outlet property="delegate" destination="dbi-Bg-jsf" id="EYB-iN-1gg"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" id="E2c-sm-t6L">
+                    <navigationItem key="navigationItem" title="Main " id="E2c-sm-t6L">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="qqr-8v-ypB">
                             <connections>
                                 <action selector="addButonClicked:" destination="dbi-Bg-jsf" id="RPz-KM-bFx"/>
@@ -85,6 +85,9 @@
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <outlet property="searchBar" destination="pjl-Gc-jYo" id="f2N-h9-2rN"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="WU9-1X-WGF" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -95,10 +98,10 @@
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Rmz-KX-8ir" sceneMemberID="viewController">
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="V1a-aZ-CdE">
-                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" largeTitles="YES" id="V1a-aZ-CdE">
+                        <rect key="frame" x="0.0" y="20" width="375" height="96"/>
                         <autoresizingMask key="autoresizingMask"/>
-                        <color key="barTintColor" red="0.6588235294" green="0.7843137255" blue="0.31214735240000002" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="barTintColor" red="0.11372549019607843" green="0.60784313725490191" blue="0.96470588235294119" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>
