@@ -95,6 +95,7 @@ class ToDoListVC: UITableViewController {
                             let item = Item()
                             item.title = textField.text!
                             item.checked = false
+                            item.currentDate = Date()
                             currentCategory.items.append(item)
                             //  item.parentCategory = currentCategory
                         }
@@ -180,6 +181,8 @@ extension ToDoListVC: UISearchBarDelegate {
         //        request.predicate = predicate
         //        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
         //loadFromCoreData(with: request, predicate: predicate)
+        dataArray = dataArray?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "currentDate", ascending: true)
+        tableView.reloadData()
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
