@@ -10,7 +10,7 @@ import UIKit
 import CoreData
 import RealmSwift
 
-class ToDoListVC: UITableViewController {
+class ToDoListVC: SwipeTableTableVC {
     
     let realm = try! Realm()
     
@@ -19,6 +19,7 @@ class ToDoListVC: UITableViewController {
     let defaults = UserDefaults.standard
     let filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
     //Load items as soon as categories gets set from the CategoriesVC
     var selectedCategory: Categories? {
         didSet {
@@ -31,10 +32,24 @@ class ToDoListVC: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.rowHeight = 80
         //  loadDataWithCodableProtocol()
         //        if let data = defaults.array(forKey: defaultsKey) as? [Item] {
         //            dataArray = data
         //        }
+    }
+    
+    override func updateModels(at indexPath: IndexPath) {
+        if let item = dataArray?[indexPath.row] {
+            do {
+                try realm.write {
+                    realm.delete(item)
+                }
+            } catch {
+                print("Error: \(error)")
+            }
+            
+        }
     }
     
     //MARK - TableView Methods
@@ -47,7 +62,7 @@ class ToDoListVC: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "TodoeyCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         if let item = dataArray?[indexPath.row] {
             cell.textLabel?.text = item.title
